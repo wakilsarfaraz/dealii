@@ -66,7 +66,7 @@ void shell_grid ()
   Triangulation<3> triangulation;
 
   const Point<3> center (1,0,0);
-  const double inner_radius = 0.9999,
+  const double inner_radius = 0.5,
                outer_radius = 1.0;
   GridGenerator::hyper_shell (triangulation,
                               center, inner_radius, outer_radius,
@@ -74,7 +74,7 @@ void shell_grid ()
   const HyperShellBoundary<3> boundary_description(center);
   triangulation.set_boundary (0, boundary_description);
 
-  for (unsigned int step=0; step<5; ++step)
+  for (unsigned int step=0; step<2; ++step)
     {
       Triangulation<3>::active_cell_iterator
       cell = triangulation.begin_active(),
@@ -88,8 +88,8 @@ void shell_grid ()
             const double distance_from_center
               = center.distance (cell->vertex(v));
 
-            if (std::fabs(distance_from_center - inner_radius) < 1e-10 ||
-            		std::fabs(distance_from_center - outer_radius) < 1e-10)
+            if (std::fabs(distance_from_center - inner_radius) > 1e-10 /*||
+            		std::fabs(distance_from_center - outer_radius) < 1e-10*/)
               {
                 cell->set_refine_flag ();
                 break;
