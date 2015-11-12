@@ -42,7 +42,7 @@ void cube_grid ()
   std::ofstream out ("cube.vtk");
   GridOut grid_out;
   grid_out.write_vtk (triangulation, out);
-  std::cout << "Grid written to cube.vtk" << std::endl;
+  std::cout << "Cube mesh in 3d is written to cube.vtk" << std::endl;
 }
 
 void square_grid ()
@@ -53,7 +53,7 @@ void square_grid ()
     std:: ofstream out("square.eps");
     GridOut grid_out;
     grid_out.write_eps (mesh, out);
-    std:: cout<<" Square Mesh is Written to square.eps"<<std::endl;
+    std:: cout<<"Square Mesh in 2d is Written to square.eps"<<std::endl;
 }
 
 void L_grid ()
@@ -66,7 +66,7 @@ void L_grid ()
   std::ofstream out ("L.vtk");
   GridOut grid_out;
   grid_out.write_vtk (triangulation, out);
-  std::cout << "Grid written to L.vtk" << std::endl;
+  std::cout << "L shape mesh in 3d is written to L.vtk" << std::endl;
 }
 
 
@@ -85,7 +85,7 @@ void shell_grid ()
   const HyperShellBoundary<3> boundary_description(center);
   triangulation.set_boundary (0, boundary_description);
 
-  for (unsigned int step=0; step<2; ++step)
+  for (unsigned int step=0; step<5; ++step)
     {
       Triangulation<3>::active_cell_iterator
       cell = triangulation.begin_active(),
@@ -99,8 +99,9 @@ void shell_grid ()
             const double distance_from_center
               = center.distance (cell->vertex(v));
 
-            if (std::fabs(distance_from_center - inner_radius) > 1e-10 /*||
-            		std::fabs(distance_from_center - outer_radius) < 1e-10*/)
+            if (std::fabs(distance_from_center - inner_radius) < 1e-10 ||
+            		std::fabs(distance_from_center - outer_radius) < 1e-10 ||
+                std::fabs(distance_from_center - (inner_radius+(inner_radius-outer_radius)/2))<1e-10)
               {
                 cell->set_refine_flag ();
                 break;
@@ -115,7 +116,7 @@ void shell_grid ()
   GridOut grid_out;
   grid_out.write_vtk (triangulation, out);
 
-  std::cout << "Grid written to shell.vtk" << std::endl;
+  std::cout << "Shell mesh in 3d is written to shell.vtk" << std::endl;
 
   triangulation.set_boundary (0);
 }
