@@ -128,4 +128,5 @@ int main ()
   cube_grid ();
   shell_grid ();
   L_grid ();
+  square_grid();
 }
