@@ -45,6 +45,17 @@ void cube_grid ()
   std::cout << "Grid written to cube.vtk" << std::endl;
 }
 
+void square_grid ()
+{
+    Triangulation<2> mesh;
+    GridGenerator:: hyper_cube (mesh);
+    mesh.refine_global(4);
+    std:: ofstream out("square.eps");
+    GridOut grid_out;
+    grid_out.write_eps (mesh, out);
+    std:: cout<<" Square Mesh is Written to square.eps"<<std::endl;
+}
+
 void L_grid ()
 {
   Triangulation<3> triangulation;
