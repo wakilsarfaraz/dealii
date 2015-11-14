@@ -1,3 +1,3 @@
 # Dealii codes
 
-https://github.com/wakilsarfaraz/git-step-1.git
+https://github.com/wakilsarfaraz/dealii.git
