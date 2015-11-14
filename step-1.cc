@@ -49,26 +49,38 @@ void square_grid ()
 {
     Triangulation<2> mesh;
     GridGenerator:: hyper_cube (mesh);
-    mesh.refine_global(4);
+    mesh.refine_global(5);
     std:: ofstream out("square.eps");
     GridOut grid_out;
     grid_out.write_eps (mesh, out);
     std:: cout<<"Square Mesh in 2d is Written to square.eps"<<std::endl;
 }
 
-void L_grid ()
+void L_grid_three ()
 {
   Triangulation<3> triangulation;
 
   GridGenerator::hyper_L(triangulation, 0,2);
   triangulation.refine_global (3);
 
-  std::ofstream out ("L.vtk");
+  std::ofstream out ("L_three.vtk");
   GridOut grid_out;
   grid_out.write_vtk (triangulation, out);
   std::cout << "L shape mesh in 3d is written to L.vtk" << std::endl;
 }
 
+void L_grid_two ()
+{
+    Triangulation<2> triangulation;
+    
+    GridGenerator::hyper_L(triangulation, 0,2);
+    triangulation.refine_global (3);
+    
+    std::ofstream out ("L_two.vtk");
+    GridOut grid_out;
+    grid_out.write_vtk (triangulation, out);
+    std::cout << "L shape mesh in 2d is written to L.vtk" << std::endl;
+}
 
 
 void shell_three ()
@@ -119,7 +131,7 @@ void shell_three ()
   triangulation.set_boundary (0);
 }
 
-void shell_two()
+void shell_two_one()
 {
     Triangulation<2> mesh;
     const Point<2> center(1,0);
@@ -148,14 +160,100 @@ void shell_two()
             }
         mesh.execute_coarsening_and_refinement();
     }
-    std::ofstream out ("shell_2d.eps");
+    std::ofstream out ("shell_2d_1.eps");
     GridOut grid_out;
     grid_out.write_eps (mesh, out);
     
-    std::cout << "Shell mesh in 2d is written to shell_2d.eps" << std::endl;
+    std::cout << "Shell mesh in 2d_1 is written to shell_2d_1.eps" << std::endl;
     
     mesh.set_boundary (0);
 }
+
+void shell_two_two()
+{
+    Triangulation<2> mesh;
+    const Point<2> center(1,0);
+    const double inner_radius = 0.5, outer_radius = 2.0;
+    GridGenerator::hyper_shell(mesh, center,inner_radius,outer_radius,10);
+    const HyperShellBoundary<2> boundary_description(center);
+    mesh.set_boundary(0,boundary_description);
+    for (unsigned int step=0; step<8; ++step)
+    {
+        Triangulation<2>:: active_cell_iterator
+        cell = mesh.begin_active(),endc = mesh.end();
+        for (; cell!=endc; ++cell)
+        {
+            for(unsigned int v=0; v < GeometryInfo<2>::vertices_per_cell; ++v)
+            {
+                const double distance_from_center = center.distance(cell -> vertex(v));
+                if (std::fabs(distance_from_center - inner_radius) < 1e-10 ||
+                    std::fabs(distance_from_center - outer_radius) < 1e-10 ||
+                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/2))<1e-10/* ||
+                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/4))<1e-10 ||
+                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/6))<1e-10*/)
+                {
+                    cell->set_refine_flag();
+                    break;
+                }
+                
+            }
+        }
+        mesh.execute_coarsening_and_refinement();
+    }
+    std::ofstream out ("shell_2d_2.eps");
+    GridOut grid_out;
+    grid_out.write_eps (mesh, out);
+    
+    std::cout << "Shell mesh in 2d_2 is written to shell_2d_2.eps" << std::endl;
+    
+    mesh.set_boundary (0);
+}
+
+
+void second_grid ()
+{
+    Triangulation<3> triangulation;
+    const Point<3> center (1,0,0);
+    const double inner_radius = 0.4,
+    outer_radius = 1.0;
+    GridGenerator::hyper_shell (triangulation,
+                                center, inner_radius, outer_radius,
+                                96,false);
+   // triangulation.set_all_manifold_ids(0);
+    const HyperShellBoundary<3> boundary_description(center);
+    triangulation.set_boundary (0, boundary_description);
+    for (unsigned int step=0; step<3; ++step)
+    {
+        Triangulation<3>::active_cell_iterator
+        cell = triangulation.begin_active(),
+        endc = triangulation.end();
+        for (; cell!=endc; ++cell)
+        {
+            for (unsigned int v=0;
+                 v < GeometryInfo<3>::vertices_per_cell;
+                 ++v)
+            {
+                const double distance_from_center = center.distance (cell->vertex(v));
+                if (cell->center()[1]>0 || std::fabs(distance_from_center-outer_radius)<1e-10|| std::fabs(distance_from_center-inner_radius)<1e-10 ||
+                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/2))<1e-10)
+                {
+                    cell->set_refine_flag ();
+                    break;
+                }
+            }
+        }
+        triangulation.execute_coarsening_and_refinement ();
+    }
+    std::ofstream out ("grid-2.vtk");
+    GridOut grid_out;
+    grid_out.write_vtk (triangulation, out);
+    std::cout << "Shell mesh is written to grid-2.vtk" << std::endl;
+    triangulation.set_boundary (0);
+}
+
+
+
+
 
 
 
@@ -163,7 +261,10 @@ int main ()
 {
   cube_grid ();
   shell_three ();
-  shell_two();
-  L_grid ();
+  shell_two_one();
+  shell_two_two();
+  L_grid_three ();
+  L_grid_two ();
   square_grid();
+  second_grid();
 }
