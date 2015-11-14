@@ -109,9 +109,9 @@ void shell_three ()
             const double distance_from_center
               = center.distance (cell->vertex(v));
 
-            if (std::fabs(distance_from_center - inner_radius) < 1e-10 ||
+            if (std::fabs(distance_from_center - inner_radius) > 1e-10/* ||
             		std::fabs(distance_from_center - outer_radius) < 1e-10 ||
-                std::fabs(distance_from_center - (inner_radius+(inner_radius-outer_radius)/2))<1e-10)
+                std::fabs(distance_from_center - (inner_radius+(inner_radius-outer_radius)/2))<1e-10*/)
               {
                 cell->set_refine_flag ();
                 break;
