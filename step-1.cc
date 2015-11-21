@@ -23,12 +23,14 @@
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/grid/tria_boundary_lib.h>
 #include <deal.II/grid/grid_out.h>
+#include <deal.II/grid/manifold_lib.h>
+#include <deal.II/grid/manifold.h>
 
 #include <iostream>
 
 #include <fstream>
 #include <cmath>
-//This is the most up to dated grid code.
+//This is my try in eclipse.
 using namespace dealii;
 
 
@@ -109,9 +111,9 @@ void shell_three ()
             const double distance_from_center
               = center.distance (cell->vertex(v));
 
-            if (std::fabs(distance_from_center - inner_radius) > 1e-10/* ||
+            if (std::fabs(distance_from_center - inner_radius) > 1e-10 ||
             		std::fabs(distance_from_center - outer_radius) < 1e-10 ||
-                std::fabs(distance_from_center - (inner_radius+(inner_radius-outer_radius)/2))<1e-10*/)
+                std::fabs(distance_from_center - (inner_radius+(inner_radius-outer_radius)/2))<1e-10)
               {
                 cell->set_refine_flag ();
                 break;
@@ -129,6 +131,49 @@ void shell_three ()
   std::cout << "Shell mesh in 3d is written to shell-3d.vtk" << std::endl;
 
   triangulation.set_boundary (0);
+}
+
+void ball_grid ()
+{
+    Triangulation<2> triangulation;
+    const Point<2> center(0,1);
+    const double radius = 2.5;
+    GridGenerator:: hyper_ball(triangulation,center,radius);
+    
+    /*triangulation.set_all_manifold_ids(0);
+    const SphericalManifold<2> manifold_description(center);
+    triangulation.set_manifold (0, manifold_description);*/
+    
+    const HyperBallBoundary<2> boundary_description(center);
+    triangulation.set_boundary(0,boundary_description);
+    for (unsigned int step=0; step<2; ++step)
+    {
+        Triangulation<2>:: active_cell_iterator
+        cell = triangulation.begin_active(),endc = triangulation.end();
+        for (; cell!=endc; ++cell)
+            for(unsigned int v=0; v < GeometryInfo<2>::vertices_per_cell; ++v)
+            {
+                const double distance_from_center = center.distance(cell -> vertex(v));
+                if (std::fabs(distance_from_center - radius) > 1e-10 )
+                {
+                    cell->set_refine_flag();
+                    break;
+                }
+                
+            }
+        triangulation.execute_coarsening_and_refinement();
+    }
+
+
+    std::ofstream out ("ball_2d.eps");
+    GridOut grid_out;
+    grid_out.write_eps (triangulation, out);
+    
+    std::cout << "Ball mesh in 2d is written to ball_2d.eps" << std::endl;
+    
+    triangulation.set_boundary (0);
+    
+
 }
 
 void shell_two_one()
@@ -188,9 +233,9 @@ void shell_two_two()
                 const double distance_from_center = center.distance(cell -> vertex(v));
                 if (std::fabs(distance_from_center - inner_radius) < 1e-10 ||
                     std::fabs(distance_from_center - outer_radius) < 1e-10 ||
-                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/2))<1e-10/* ||
+                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/2))<1e-10 ||
                     std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/4))<1e-10 ||
-                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/6))<1e-10*/)
+                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/6))<1e-10)
                 {
                     cell->set_refine_flag();
                     break;
@@ -212,30 +257,31 @@ void shell_two_two()
 
 void second_grid ()
 {
-    Triangulation<3> triangulation;
-    const Point<3> center (1,0,0);
-    const double inner_radius = 0.4,
+    Triangulation<2> triangulation;
+    const Point<2> center (1,0);
+    const double inner_radius = 0.5,
     outer_radius = 1.0;
     GridGenerator::hyper_shell (triangulation,
                                 center, inner_radius, outer_radius,
-                                96,false);
-   // triangulation.set_all_manifold_ids(0);
-    const HyperShellBoundary<3> boundary_description(center);
-    triangulation.set_boundary (0, boundary_description);
-    for (unsigned int step=0; step<3; ++step)
+                                10);
+    
+    const HyperShellBoundary<2> boundary_description(center);
+    triangulation.set_boundary(0,boundary_description);
+    for (unsigned int step=0; step<5; ++step)
     {
-        Triangulation<3>::active_cell_iterator
+        Triangulation<2>::active_cell_iterator
         cell = triangulation.begin_active(),
         endc = triangulation.end();
         for (; cell!=endc; ++cell)
         {
             for (unsigned int v=0;
-                 v < GeometryInfo<3>::vertices_per_cell;
+                 v < GeometryInfo<2>::vertices_per_cell;
                  ++v)
             {
-                const double distance_from_center = center.distance (cell->vertex(v));
-                if (cell->center()[1]>0 || std::fabs(distance_from_center-outer_radius)<1e-10|| std::fabs(distance_from_center-inner_radius)<1e-10 ||
-                    std::fabs(distance_from_center - (inner_radius+(outer_radius-inner_radius)/2))<1e-10)
+                const double distance_from_center
+                = center.distance (cell->vertex(v));
+                if (std::fabs(distance_from_center - inner_radius) < 1e-10||
+                    std::fabs(distance_from_center-(inner_radius+(outer_radius-inner_radius)/2))<1e-10)
                 {
                     cell->set_refine_flag ();
                     break;
@@ -244,27 +290,22 @@ void second_grid ()
         }
         triangulation.execute_coarsening_and_refinement ();
     }
-    std::ofstream out ("grid-2.vtk");
+    std::ofstream out ("grid-2.eps");
     GridOut grid_out;
-    grid_out.write_vtk (triangulation, out);
-    std::cout << "Shell mesh is written to grid-2.vtk" << std::endl;
+    grid_out.write_eps (triangulation, out);
+    std::cout << "Grid written to grid-2.eps" << std::endl;
     triangulation.set_boundary (0);
 }
-
-
-
-
-
-
 
 int main ()
 {
   cube_grid ();
-  shell_three ();
-  shell_two_one();
-  shell_two_two();
-  L_grid_three ();
-  L_grid_two ();
-  square_grid();
+   shell_three ();
+    shell_two_one();
+     shell_two_two();
+      L_grid_three ();
+     L_grid_two ();
+    square_grid();
+   ball_grid();
   second_grid();
 }
