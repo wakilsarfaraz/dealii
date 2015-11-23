@@ -135,26 +135,29 @@ void shell_three ()
 
 void ball_grid ()
 {
-    Triangulation<2> triangulation;
-    const Point<2> center(0,1);
-    const double radius = 2.5;
+    Triangulation<3> triangulation;
+    const Point<3> center(0,0,0);
+    const double radius = 0.5;
     GridGenerator:: hyper_ball(triangulation,center,radius);
     
     /*triangulation.set_all_manifold_ids(0);
     const SphericalManifold<2> manifold_description(center);
     triangulation.set_manifold (0, manifold_description);*/
     
-    const HyperBallBoundary<2> boundary_description(center);
-    triangulation.set_boundary(0,boundary_description);
-    for (unsigned int step=0; step<2; ++step)
+    /*const HyperBallBoundary<2> boundary_description(center);*/
+    const SphericalManifold<3> manifold_description(center);
+    triangulation.set_manifold(0,manifold_description);
+
+    for (unsigned int step=0; step<5; ++step)
     {
-        Triangulation<2>:: active_cell_iterator
+        Triangulation<3>:: active_cell_iterator
         cell = triangulation.begin_active(),endc = triangulation.end();
         for (; cell!=endc; ++cell)
-            for(unsigned int v=0; v < GeometryInfo<2>::vertices_per_cell; ++v)
+            for(unsigned int v=0; v < GeometryInfo<3>::vertices_per_cell; ++v)
             {
                 const double distance_from_center = center.distance(cell -> vertex(v));
-                if (std::fabs(distance_from_center - radius) > 1e-10 )
+                if (std::fabs(distance_from_center - radius) < 1e-10 ||
+                    std::fabs(distance_from_center - (radius)/2)<1e-10)
                 {
                     cell->set_refine_flag();
                     break;
@@ -165,13 +168,13 @@ void ball_grid ()
     }
 
 
-    std::ofstream out ("ball_2d.eps");
+    std::ofstream out ("ball_3d.vtk");
     GridOut grid_out;
-    grid_out.write_eps (triangulation, out);
+    grid_out.write_vtk (triangulation, out);
     
-    std::cout << "Ball mesh in 2d is written to ball_2d.eps" << std::endl;
+    std::cout << "Ball mesh in 3d is written to ball_3d.vtk" << std::endl;
     
-    triangulation.set_boundary (0);
+    triangulation.set_manifold (0);
     
 
 }
@@ -264,6 +267,50 @@ void second_grid ()
     GridGenerator::hyper_shell (triangulation,
                                 center, inner_radius, outer_radius,
                                 10);
+    triangulation.set_all_manifold_ids(0);
+    const SphericalManifold<2> manifold_description(center);
+    triangulation.set_manifold (0, manifold_description);
+    for (unsigned int step=0; step<5; ++step)
+    {
+        Triangulation<2>::active_cell_iterator
+        cell = triangulation.begin_active(),
+        endc = triangulation.end();
+        for (; cell!=endc; ++cell)
+        {
+            for (unsigned int v=0;
+                 v < GeometryInfo<2>::vertices_per_cell;
+                 ++v)
+            {
+                const double distance_from_center
+                = center.distance (cell->vertex(v));
+                if (std::fabs(distance_from_center - inner_radius) < 1e-10 ||
+                    std::fabs(distance_from_center - outer_radius) < 1e-10 ||
+                    std::fabs(distance_from_center-(inner_radius+(outer_radius-inner_radius)/3))<1e-10/* ||
+                    std::fabs(distance_from_center-(inner_radius+(outer_radius-inner_radius)/0.5))<1e-10*/)
+                {
+                    cell->set_refine_flag ();
+                    break;
+                }
+            }
+        }
+        triangulation.execute_coarsening_and_refinement ();
+    }
+    std::ofstream out ("grid-2.eps");
+    GridOut grid_out;
+    grid_out.write_eps (triangulation, out);
+    std::cout << "Grid written to grid-2.eps" << std::endl;
+    triangulation.set_manifold (0);
+}
+
+/*void second_grid ()
+{
+    Triangulation<2> triangulation;
+    const Point<2> center (1,0);
+    const double inner_radius = 0.5,
+    outer_radius = 1.0;
+    GridGenerator::hyper_shell (triangulation,
+                                center, inner_radius, outer_radius,
+                                10);
     
     const HyperShellBoundary<2> boundary_description(center);
     triangulation.set_boundary(0,boundary_description);
@@ -295,7 +342,7 @@ void second_grid ()
     grid_out.write_eps (triangulation, out);
     std::cout << "Grid written to grid-2.eps" << std::endl;
     triangulation.set_boundary (0);
-}
+}*/
 
 int main ()
 {
