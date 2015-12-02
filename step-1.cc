@@ -30,7 +30,7 @@
 
 #include <fstream>
 #include <cmath>
-//my try on the linux.
+//my try on mac.
 using namespace dealii;
 
 
