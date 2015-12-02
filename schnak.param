@@ -1,0 +1,41 @@
+set Test ID = test
+set Number of threads = 8
+set Save Animation = false
+set Space Dimension = 2
+set Read Mesh = false
+
+# Time parameters - timestep method is BE or FST or CN
+# (use theta = -1. to use dafault value 1-sqrt(1/2)
+subsection Time
+   set Timestep  = .01
+   set Endtime   = .02
+   set Timestep Method = FST
+   set Theta =    -1.
+end
+
+# domain shape is one of square/circle/ellipse/moebius
+subsection Mesh and Domain
+   set Domain Shape  = circle
+    subsection Ellipse
+      set Ellipse a = 1.
+      set Ellipse b = 2.
+      set Ellipse c = 3.
+    end
+end
+
+# coupling reaction paramters
+subsection Reaction
+   set Alpha 1 = .01
+   set Beta 1  = .416666666
+   set Kappa 1 = 1.0146333333333333333
+   set Alpha 2 = .01
+   set Beta 2  = 1.0146333333333333333
+   set Kappa 2 = 5.
+end
+
+subsection Solver
+   set Maximum nonlinear iterations      = 10
+   set Nonlinear Solver                  = Newton
+   set Nonlinear solver tolerance        = 1.e-6
+   set Matrix solver tolerance           = 1.e-10
+end

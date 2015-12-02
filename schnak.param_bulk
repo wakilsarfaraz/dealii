@@ -1,0 +1,23 @@
+subsection Mesh and Domain
+   set Mesh size     = 4
+end
+
+subsection Reaction
+   set a             = 0.1
+   set b             = 0.9
+   set d             = 20.
+   set gamma         = 100.
+end
+
+subsection Solver
+   set Number of gauss quadrature points = 2
+   set Maximum nonlinear iterations      = 50
+   set Nonlinear Solver                  = Newton
+   set Nonlinear solver tolerance        = 1.e-6
+   set Matrix solver tolerance           = 1.e-10
+end
+
+subsection Finite Element Space
+   set FE Polynomial Order = 1
+   set Mapping Order       = 1
+end
