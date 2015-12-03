@@ -1061,7 +1061,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
          GridGenerator::hyper_cube (volume_mesh, 0., 1.);  // create [0,1]^spacedim
           std::set<types::boundary_id> boundary_ids;
           boundary_ids.insert (0);
-         GridTools::extract_boundary_mesh (volume_mesh, triangulation,
+         GridGenerator::extract_boundary_mesh (volume_mesh, triangulation,
                                                boundary_ids);
      triangulation.refine_global (parameters->meshsize);
      }
@@ -1080,7 +1080,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
        std::set<types::boundary_id> boundary_ids;
        boundary_ids.insert (0);
 
-   GridTools::extract_boundary_mesh (volume_mesh, triangulation,
+   GridGenerator::extract_boundary_mesh (volume_mesh, triangulation,
                                             boundary_ids);
    triangulation.refine_global (parameters->meshsize);
         
@@ -1105,7 +1105,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
        boundary_ids.insert (0);
        boundary_ids.insert (1);
 
-   GridTools::extract_boundary_mesh (volume_mesh, triangulation, boundary_ids);
+   GridGenerator::extract_boundary_mesh (volume_mesh, triangulation, boundary_ids);
    triangulation.refine_global (parameters->meshsize);
 
        
@@ -1118,7 +1118,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
           GridGenerator::moebius(volume_mesh,1000,0,1.,.5);
           std::set<types::boundary_id> boundary_ids;
           boundary_ids.insert (0);
-      GridTools::extract_boundary_mesh (volume_mesh, triangulation,
+      GridGenerator::extract_boundary_mesh (volume_mesh, triangulation,
                                                boundary_ids);
      triangulation.refine_global (parameters->meshsize);
      }
@@ -1171,7 +1171,7 @@ void RDProblem<dim,spacedim>::read_grid(ValueToType<false>  /*dim_eq_spacedim*/)
    std::set<types::boundary_id> boundary_ids;
     boundary_ids.insert (0);
 
-   GridTools::extract_boundary_mesh (volume_mesh, triangulation,
+   GridGenerator::extract_boundary_mesh (volume_mesh, triangulation,
                                             boundary_ids);
 }
 
