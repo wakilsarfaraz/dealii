@@ -1,3 +1,4 @@
+/*This script solves bulk surface reaction diffusion system*/
 #include <deal.II/grid/tria.h>
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/grid/grid_in.h>
