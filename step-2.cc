@@ -33,6 +33,7 @@
 #include <deal.II/dofs/dof_renumbering.h>
 #include <fstream>
 using namespace dealii;
+
 /*void make_grid (Triangulation<2> &triangulation)
 {
     const Point<2> center (1,0);
@@ -71,26 +72,26 @@ using namespace dealii;
     std::cout << "Shell mesh in 2d is written to shell.eps" << std::endl;
 }*/
 
-void make_grid (Triangulation<2> &triangulation)
+void make_grid (Triangulation<3> &triangulation)
 {
-    const Point<2> center (1,0);
+    const Point<3> center (1,0,0);
     const double inner_radius = 0.5,
     outer_radius = 1.0;
     GridGenerator::hyper_shell (triangulation,
                                 center, inner_radius, outer_radius,
-                                10);
+                                96);
     triangulation.set_all_manifold_ids(0);
-    const static SphericalManifold<2> manifold_description(center);
+    const static SphericalManifold<3> manifold_description(center);
     triangulation.set_manifold (0, manifold_description);
     for (unsigned int step=0; step<5; ++step)
     {
-        Triangulation<2>::active_cell_iterator
+        Triangulation<3>::active_cell_iterator
         cell = triangulation.begin_active(),
         endc = triangulation.end();
         for (; cell!=endc; ++cell)
         {
             for (unsigned int v=0;
-                 v < GeometryInfo<2>::vertices_per_cell;
+                 v < GeometryInfo<3>::vertices_per_cell;
                  ++v)
             {
                 const double distance_from_center
@@ -107,18 +108,18 @@ void make_grid (Triangulation<2> &triangulation)
         }
         triangulation.execute_coarsening_and_refinement ();
     }
-    std::ofstream out ("grid-2.eps");
+    std::ofstream out ("grid-3.vtk");
     GridOut grid_out;
-    grid_out.write_eps (triangulation, out);
-    std::cout << "Grid written to grid-2.eps" << std::endl;
+    grid_out.write_vtk (triangulation, out);
+    std::cout << "Grid written to grid-3.vtk" << std::endl;
     triangulation.set_manifold (0);
 }
 
 
 
-void distribute_dofs (DoFHandler<2> &dof_handler)
+void distribute_dofs (DoFHandler<3> &dof_handler)
 {
-    static const FE_Q<2> finite_element(1);
+    static const FE_Q<3> finite_element(1);
     dof_handler.distribute_dofs (finite_element);
     DynamicSparsityPattern dynamic_sparsity_pattern(dof_handler.n_dofs(),
                                                     dof_handler.n_dofs());
@@ -128,7 +129,7 @@ void distribute_dofs (DoFHandler<2> &dof_handler)
     std::ofstream out ("sparsity_pattern.1");
     sparsity_pattern.print_gnuplot (out);
 }
-void renumber_dofs (DoFHandler<2> &dof_handler)
+void renumber_dofs (DoFHandler<3> &dof_handler)
 {
     DoFRenumbering::Cuthill_McKee (dof_handler);
     DynamicSparsityPattern dynamic_sparsity_pattern(dof_handler.n_dofs(),
@@ -141,9 +142,9 @@ void renumber_dofs (DoFHandler<2> &dof_handler)
 }
 int main ()
 {
-    Triangulation<2> triangulation;
+    Triangulation<3> triangulation;
     make_grid (triangulation);
-    DoFHandler<2> dof_handler (triangulation);
+    DoFHandler<3> dof_handler (triangulation);
     distribute_dofs (dof_handler);
     renumber_dofs (dof_handler);
 }
