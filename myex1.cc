@@ -122,12 +122,6 @@ void ball_grid ()
     const Point<3> center(0,0,0);
     const double radius = 0.5;
     GridGenerator:: hyper_ball(triangulation,center,radius);
-    
-    /*triangulation.set_all_manifold_ids(0);
-    const SphericalManifold<2> manifold_description(center);
-    triangulation.set_manifold (0, manifold_description);*/
-    
-    /*const HyperBallBoundary<2> boundary_description(center);*/
     const SphericalManifold<3> manifold_description(center);
     triangulation.set_manifold(0,manifold_description);
 
