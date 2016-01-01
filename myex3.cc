@@ -1,15 +1,16 @@
-//This script is my example of s simple laplace solver in dealii.
+//This script is my example of simple laplace solver in dealii.
 
 
 #include <deal.II/grid/tria.h>
 #include <deal.II/dofs/dof_handler.h>
 
 #include <deal.II/grid/grid_generator.h>
-
+#include <deal.II/grid/grid_out.h>
 #include <deal.II/grid/tria_accessor.h>
 #include <deal.II/grid/tria_iterator.h>
 #include <deal.II/dofs/dof_accessor.h>
 
+#include <deal.II/grid/manifold_lib.h>
 
 #include <deal.II/fe/fe_q.h>
 
@@ -35,6 +36,8 @@
 #include <deal.II/numerics/data_out.h>
 #include <fstream>
 #include <iostream>
+#include <math.h>
+#include <iomanip>
 
 
 using namespace dealii;
@@ -63,19 +66,50 @@ class LaplaceSolver
 	Vector<double>		system_rhs;
 };
 
-LaplaceSolver::LaplaceSolver ()
-	:
-	fe(1), dof_handler (triangulation)
+LaplaceSolver::LaplaceSolver ()	
+	:fe(1), dof_handler (triangulation)
 	{}
 
-void LaplaceSolver::make_grid ()
+/*void LaplaceSolver::make_grid ()
 	{
 		GridGenerator::hyper_cube (triangulation,-1,1);
-		triangulation.refine_global (5);
+		triangulation.refine_global (2);
 		
 		std::cout<<"Number of active cells in the domain: "
 			 <<triangulation.n_active_cells()
 			 <<std::endl;
+	}*/
+
+void LaplaceSolver::make_grid ()
+	{
+		const Point<2> center(0,0);
+		const double radius = 1.5;
+		GridGenerator::hyper_ball(triangulation,center,radius);
+		const SphericalManifold<2> manifold_description(center);
+		triangulation.set_manifold(0,manifold_description);
+		
+		for (unsigned int step=0; step<6; ++step)
+		{
+			Triangulation<2>::active_cell_iterator
+			cell = triangulation.begin_active(),endc = triangulation.end();
+			for (; cell != endc; ++cell)
+			for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_cell; ++v)
+			{
+			const double distance_from_center = center.distance(cell->vertex(v));
+			if (std::fabs(distance_from_center - radius) < 1e-10 ||
+					distance_from_center - (radius/2) < 1e-10)
+				{
+				cell->set_refine_flag();
+				break;
+				}
+			}
+		triangulation.execute_coarsening_and_refinement();
+		}
+		std::ofstream out ("disk.eps");
+		GridOut grid_out;
+		grid_out.write_eps (triangulation,out);
+		std::cout<<"The mesh of the domain is in disc.eps"<<std::endl;
+		triangulation.set_manifold(0);
 	}
 
 void LaplaceSolver::setup_system ()
@@ -129,7 +163,7 @@ void LaplaceSolver:: assemble_system ()
 
 				for (unsigned int i=0; i<dofs_per_cell; ++i)
 				cell_rhs(i) += (fe_values.shape_value (i, q_index) *
-						1 * fe_values.JxW (q_index));
+					sin(q_index) * fe_values.JxW (q_index));
 			}
 			
 			cell->get_dof_indices (local_dof_indices);
@@ -145,7 +179,7 @@ void LaplaceSolver:: assemble_system ()
 		}
 		
 		std::map<types::global_dof_index,double> boundary_values;
-		VectorTools::interpolate_boundary_values (dof_handler,0,ZeroFunction<2>(),
+		VectorTools::interpolate_boundary_values(dof_handler,0,ZeroFunction<2>(),
 							  boundary_values);
 
 		MatrixTools::apply_boundary_values (boundary_values, system_matrix,
@@ -168,8 +202,8 @@ void LaplaceSolver:: output_results () const
 		data_out.add_data_vector (solution, "solution");
 
 		data_out.build_patches ();
-		std::ofstream output("solution.gpl");
-		data_out.write_gnuplot (output);
+		std::ofstream output("solution.vtk");
+		data_out.write_vtk (output);
 	}
 
 void LaplaceSolver::run()
@@ -188,22 +222,5 @@ int main ()
 		
 		return 0;
 	}
-
-		
-
-
-			
-
-
-
-		
-
-
-
-
-
-
-
-
 
 
