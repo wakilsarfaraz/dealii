@@ -1,7 +1,7 @@
 set Test ID = test
 set Number of threads = 8
 set Save Animation = false
-set Space Dimension = 2
+set Space Dimension = 3
 set Read Mesh = false
 
 # Time parameters - timestep method is BE or FST or CN
