@@ -30,6 +30,8 @@
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/sparse_matrix.h>
+#include <deal.II/lac/chunk_sparsity_pattern.h>
+#include <deal.II/lac/petsc_parallel_sparse_matrix.h>
 #include <deal.II/lac/block_vector.h>
 #include <deal.II/lac/block_sparse_matrix.h>
 #include <deal.II/lac/block_vector.h>
@@ -1000,6 +1002,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<true>  /*dim_eq_spacedim*/)
   else if ( ( (common_parameters->domain_shape) ==  "circle") || ((common_parameters->domain_shape) == "ellipse"))  
    {    
    // define centre
+   // const Point<dim> centre (0,0,0);
    bool         initialize = 1;
    const        Point<spacedim> centre (initialize); //initialize all to 0
    const double radius = 1.; 
@@ -2637,7 +2640,17 @@ shared_out << "Builing initial sparsity pattern..." << std::endl;
                             compressed_sparsity_pattern_20,
                             compressed_sparsity_pattern_30,
                             compressed_sparsity_pattern_21, 
-                            compressed_sparsity_pattern_31;  
+                            compressed_sparsity_pattern_31; 
+
+  //CompressedSparsityPattern compressed_simple_sparsity_pattern_02,
+//				  compressed_simple_sparsity_pattern_03,
+//                                compressed_simple_sparsity_pattern_12,
+//				  compressed_simple_sparsity_pattern_13,
+//                                  compressed_simple_sparsity_pattern_20, 
+//				  compressed_simple_sparsity_pattern_30,
+//                                  compressed_simple_sparsity_pattern_21,
+//				  compressed_simple_sparsity_pattern_31;
+                                  
 
    compressed_sparsity_pattern_02.reinit(n_u,n_r);
    compressed_sparsity_pattern_03.reinit(n_u,n_s);
