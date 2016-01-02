@@ -79,8 +79,42 @@ LaplaceSolver::LaplaceSolver ()
 			 <<triangulation.n_active_cells()
 			 <<std::endl;
 	}*/
+void LaplaceSolver::make_grid()
+	{
+		const Point<2> center(0,0);
+		const double inner_radius = 0.5, outer_radius = 1;
+		GridGenerator::hyper_shell(triangulation, center,inner_radius, outer_radius,10);
+		triangulation.set_all_manifold_ids(0);
+		const SphericalManifold<2> manifold_description(center);
+		triangulation.set_manifold(0,manifold_description);
+		for (unsigned int step=0; step<4; ++step)
+		{
+			Triangulation<2>::active_cell_iterator 
+			cell=triangulation.begin_active(), endc=triangulation.end();
+			for (; cell != endc; ++cell)
+			for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_cell; ++v)
+			{
+				const double distance_from_center = center.distance(cell -> vertex(v));
+				if (std::fabs(distance_from_center - inner_radius) > 1e-10)
+				{
+					cell ->set_refine_flag();
+					break;
+				}
+			}
+		triangulation.execute_coarsening_and_refinement();
+		}
+		std::ofstream out("shell.eps");
+		GridOut grid_out;
+		grid_out.write_eps (triangulation, out);
+		std::cout<<"Mesh is written to shell.eps"<<std::endl;
+	        std::cout<<"Number of active cells in the domain: "
+                         <<triangulation.n_active_cells()
+                         <<std::endl;
+		triangulation.set_manifold(0);
+	}
 
-void LaplaceSolver::make_grid ()
+   
+/*void LaplaceSolver::make_grid ()
 	{
 		const Point<2> center(0,0);
 		const double radius = 1.5;
@@ -96,8 +130,7 @@ void LaplaceSolver::make_grid ()
 			for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_cell; ++v)
 			{
 			const double distance_from_center = center.distance(cell->vertex(v));
-			if (std::fabs(distance_from_center - radius) < 1e-10 ||
-					distance_from_center - (radius/2) < 1e-10)
+			if (std::fabs(distance_from_center - radius) > 1e-10)
 				{
 				cell->set_refine_flag();
 				break;
@@ -110,7 +143,7 @@ void LaplaceSolver::make_grid ()
 		grid_out.write_eps (triangulation,out);
 		std::cout<<"The mesh of the domain is in disc.eps"<<std::endl;
 		triangulation.set_manifold(0);
-	}
+	}*/
 
 void LaplaceSolver::setup_system ()
 	{
@@ -202,8 +235,8 @@ void LaplaceSolver:: output_results () const
 		data_out.add_data_vector (solution, "solution");
 
 		data_out.build_patches ();
-		std::ofstream output("solution.vtk");
-		data_out.write_vtk (output);
+		std::ofstream output("solution.gpl");
+		data_out.write_gnuplot (output);
 	}
 
 void LaplaceSolver::run()
