@@ -1,4 +1,5 @@
 //This script is my example of simple laplace solver in dealii.
+//It can solve laplace equation on a disc, square, a shell and L shape.
 
 
 #include <deal.II/grid/tria.h>
@@ -73,7 +74,11 @@ LaplaceSolver::LaplaceSolver ()
 /*void LaplaceSolver::make_grid ()
 	{
 		GridGenerator::hyper_cube (triangulation,-1,1);
-		triangulation.refine_global (2);
+		triangulation.begin_active()->face(0)->set_boundary_id(0);
+		triangulation.begin_active()->face(1)->set_boundary_id(0);
+		triangulation.begin_active()->face(2)->set_boundary_id(0);
+                triangulation.begin_active()->face(3)->set_boundary_id(0);
+		triangulation.refine_global (5);
 		
 		std::cout<<"Number of active cells in the domain: "
 			 <<triangulation.n_active_cells()
@@ -84,7 +89,13 @@ void LaplaceSolver::make_grid()
 		const Point<2> center(0,0);
 		const double inner_radius = 0.5, outer_radius = 1;
 		GridGenerator::hyper_shell(triangulation, center,inner_radius, outer_radius,10);
-		triangulation.set_all_manifold_ids(0);
+		
+		triangulation.begin_active()->face(0)->set_boundary_id(0);
+                triangulation.begin_active()->face(1)->set_boundary_id(0);
+                triangulation.begin_active()->face(2)->set_boundary_id(1);
+                triangulation.begin_active()->face(3)->set_boundary_id(0);
+
+	       	/*triangulation.set_all_manifold_ids(0);*/
 		const SphericalManifold<2> manifold_description(center);
 		triangulation.set_manifold(0,manifold_description);
 		for (unsigned int step=0; step<4; ++step)
@@ -103,6 +114,7 @@ void LaplaceSolver::make_grid()
 			}
 		triangulation.execute_coarsening_and_refinement();
 		}
+
 		std::ofstream out("shell.eps");
 		GridOut grid_out;
 		grid_out.write_eps (triangulation, out);
@@ -196,7 +208,7 @@ void LaplaceSolver:: assemble_system ()
 
 				for (unsigned int i=0; i<dofs_per_cell; ++i)
 				cell_rhs(i) += (fe_values.shape_value (i, q_index) *
-					sin(q_index) * fe_values.JxW (q_index));
+					(1)* fe_values.JxW (q_index));
 			}
 			
 			cell->get_dof_indices (local_dof_indices);
@@ -210,10 +222,12 @@ void LaplaceSolver:: assemble_system ()
 				for (unsigned int i=0; i<dofs_per_cell; ++i)
 				system_rhs(local_dof_indices[i]) += cell_rhs(i);
 		}
-		
 		std::map<types::global_dof_index,double> boundary_values;
-		VectorTools::interpolate_boundary_values(dof_handler,0,ZeroFunction<2>(),
+		VectorTools::interpolate_boundary_values(dof_handler,0,ConstantFunction<2> (1),
 							  boundary_values);
+		VectorTools::interpolate_boundary_values(dof_handler,1,ZeroFunction<2>(),
+                                                          boundary_values);
+
 
 		MatrixTools::apply_boundary_values (boundary_values, system_matrix,
 						    solution, system_rhs);
@@ -235,8 +249,8 @@ void LaplaceSolver:: output_results () const
 		data_out.add_data_vector (solution, "solution");
 
 		data_out.build_patches ();
-		std::ofstream output("solution.gpl");
-		data_out.write_gnuplot (output);
+		std::ofstream output("solution.vtk");
+		data_out.write_vtk (output);
 	}
 
 void LaplaceSolver::run()
