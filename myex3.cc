@@ -88,14 +88,12 @@ void LaplaceSolver::make_grid()
 	{
 		const Point<2> center(0,0);
 		const double inner_radius = 0.5, outer_radius = 1;
-		GridGenerator::hyper_shell(triangulation, center,inner_radius, outer_radius,10);
+		GridGenerator::hyper_shell(triangulation, center,inner_radius, outer_radius,10,true);
 		
-		triangulation.begin_active()->face(0)->set_boundary_id(0);
-                triangulation.begin_active()->face(1)->set_boundary_id(0);
                 triangulation.begin_active()->face(2)->set_boundary_id(1);
-                triangulation.begin_active()->face(3)->set_boundary_id(0);
+             
 
-	       	/*triangulation.set_all_manifold_ids(0);*/
+	       	triangulation.set_all_manifold_ids(0);
 		const SphericalManifold<2> manifold_description(center);
 		triangulation.set_manifold(0,manifold_description);
 		for (unsigned int step=0; step<4; ++step)
@@ -223,9 +221,9 @@ void LaplaceSolver:: assemble_system ()
 				system_rhs(local_dof_indices[i]) += cell_rhs(i);
 		}
 		std::map<types::global_dof_index,double> boundary_values;
-		VectorTools::interpolate_boundary_values(dof_handler,0,ConstantFunction<2> (1),
+		VectorTools::interpolate_boundary_values(dof_handler,0,ConstantFunction<2> (0),
 							  boundary_values);
-		VectorTools::interpolate_boundary_values(dof_handler,1,ZeroFunction<2>(),
+		VectorTools::interpolate_boundary_values(dof_handler,1,ConstantFunction<2>(1),
                                                           boundary_values);
 
 
@@ -249,8 +247,8 @@ void LaplaceSolver:: output_results () const
 		data_out.add_data_vector (solution, "solution");
 
 		data_out.build_patches ();
-		std::ofstream output("solution.vtk");
-		data_out.write_vtk (output);
+		std::ofstream output("solution.gpl");
+		data_out.write_gnuplot (output);
 	}
 
 void LaplaceSolver::run()
