@@ -68,10 +68,10 @@ class LaplaceSolver
 };
 
 LaplaceSolver::LaplaceSolver ()	
-	:fe(1), dof_handler (triangulation)
+	:fe(2), dof_handler (triangulation)
 	{}
 
-/*void LaplaceSolver::make_grid ()
+void LaplaceSolver::make_grid ()
 	{
 		GridGenerator::hyper_cube (triangulation,-1,1);
 		triangulation.begin_active()->face(0)->set_boundary_id(0);
@@ -83,14 +83,15 @@ LaplaceSolver::LaplaceSolver ()
 		std::cout<<"Number of active cells in the domain: "
 			 <<triangulation.n_active_cells()
 			 <<std::endl;
-	}*/
-void LaplaceSolver::make_grid()
+	}
+/*void LaplaceSolver::make_grid()
 	{
 		const Point<2> center(0,0);
 		const double inner_radius = 0.5, outer_radius = 1;
 		GridGenerator::hyper_shell(triangulation, center,inner_radius, outer_radius,10,true);
 		
                 triangulation.begin_active()->face(2)->set_boundary_id(1);
+		 triangulation.set_all_manifold_ids(0);
              
 
 	       	triangulation.set_all_manifold_ids(0);
@@ -121,7 +122,7 @@ void LaplaceSolver::make_grid()
                          <<triangulation.n_active_cells()
                          <<std::endl;
 		triangulation.set_manifold(0);
-	}
+	}*/
 
    
 /*void LaplaceSolver::make_grid ()
@@ -249,6 +250,9 @@ void LaplaceSolver:: output_results () const
 		data_out.build_patches ();
 		std::ofstream output("solution.gpl");
 		data_out.write_gnuplot (output);
+		std::cout << "Solution at (1/3,1/3): "
+          	<< VectorTools::point_value (dof_handler, solution,
+                                       Point<2>(1./3, 1./3)) << std::endl;
 	}
 
 void LaplaceSolver::run()
