@@ -677,14 +677,14 @@ class InitialConditions : public Function<spacedim>
                 Function<spacedim>(2),u_eq(u_eq),v_eq(v_eq) {}
  
      double u_eq,v_eq;
-     virtual void vector_value (const Point<spacedim> /*&p*/,
+     virtual void vector_value (const Point<spacedim> &/*p*/,
                                 Vector<double>   &values) const;
      virtual void vector_value_list (const std::vector<Point<spacedim> > &points,
                                      std::vector<Vector<double> >   &values) const;
   };
 
 template <int spacedim>
-void InitialConditions<spacedim>::vector_value (const Point<spacedim> /*&p*/,
+void InitialConditions<spacedim>::vector_value (const Point<spacedim> &/*p*/,
                                                 Vector<double>   &values) const
    {
      // dummy line to use input parameter
@@ -895,7 +895,7 @@ void RDProblem<dim,spacedim>::initialise()
   }
   
    // then output initial conditions
- output_solution(solution,output_directory+"/xi-ini.vtu");
+ output_solution(solution,output_directory+"/xi-ini.vtk");
   
  }
  
@@ -1819,7 +1819,7 @@ void RDProblem<dim,spacedim>::output_solution (BlockVector<double> output_soluti
 
   // write paravire vtu file 
   std::ofstream output (output_name.c_str()); 
-  data_out.write_vtu (output);
+  data_out.write_vtk (output);
   
  
 }
@@ -2600,7 +2600,7 @@ void CoupledSystemHandler<dim,spacedim>::setup_full_system()
                      n_s = RD_surf.n_v;
   const unsigned int n_bulk  = n_u+n_v,
                      n_surf  = n_r+n_s,
-                     n_total = n_bulk+n_surf;   
+                     n_total = n_bulk+n_surf;
          
   // do the same for the actual block sparsity pattern
  // now get the rest of the sparsity pattern
@@ -2629,14 +2629,15 @@ shared_out << "Builing initial sparsity pattern..." << std::endl;
   block_sparsity_pattern.block(3,1).reinit(n_s,n_v,n_v);
   block_sparsity_pattern.collect_sizes();
 
-  CompressedSimpleSparsityPattern compressed_sparsity_pattern_02,
+  /*CompressedSimpleSparsityPattern*/DynamicSparsityPattern compressed_sparsity_pattern_02,
                             compressed_sparsity_pattern_03,
                             compressed_sparsity_pattern_12, 
                             compressed_sparsity_pattern_13,  
                             compressed_sparsity_pattern_20,
                             compressed_sparsity_pattern_30,
                             compressed_sparsity_pattern_21, 
-                            compressed_sparsity_pattern_31;  
+                            compressed_sparsity_pattern_31;
+
 
    compressed_sparsity_pattern_02.reinit(n_u,n_r);
    compressed_sparsity_pattern_03.reinit(n_u,n_s);
