@@ -1,4 +1,3 @@
-/*This script solves bulk surface reaction diffusion system*/
 #include <deal.II/grid/tria.h>
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/grid/grid_in.h>
@@ -30,8 +29,6 @@
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/sparse_matrix.h>
-#include <deal.II/lac/chunk_sparsity_pattern.h>
-#include <deal.II/lac/petsc_parallel_sparse_matrix.h>
 #include <deal.II/lac/block_vector.h>
 #include <deal.II/lac/block_sparse_matrix.h>
 #include <deal.II/lac/block_vector.h>
@@ -186,11 +183,11 @@ parameter_handler.enter_subsection("Time");
                                     Patterns::Selection("BE|FST|CN"),
                                     "Time discretisation method - BE or FST or CN");
 								   
- parameter_handler.declare_entry ("Timestep", ".001",
+ parameter_handler.declare_entry ("Timestep", ".01",
                                     Patterns::Double(),
                                     "Size of the timestep");
 
- parameter_handler.declare_entry ("Endtime", "10000.",
+ parameter_handler.declare_entry ("Endtime", "100.",
                                     Patterns::Double(),
                                     "Endtime value");
 								   
@@ -1002,12 +999,11 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<true>  /*dim_eq_spacedim*/)
   else if ( ( (common_parameters->domain_shape) ==  "circle") || ((common_parameters->domain_shape) == "ellipse"))  
    {    
    // define centre
-   // const Point<dim> centre (0,0,0);
    bool         initialize = 1;
-   const        Point<spacedim> centre (initialize); //initialize all to 0
+   const        Point<spacedim> centre; //initialize all to 0
    const double radius = 1.; 
    // tell program we have a curved boundary (needed for proper mesh refinement)
-   static const HyperBallBoundary<dim,spacedim> circular_boundary_description(centre,radius);
+   static const HyperBallBoundary<dim,spacedim> circular_boundary_description(centre,radius);    
    triangulation.set_boundary (0,  circular_boundary_description); 
    GridGenerator::hyper_ball (triangulation,centre,radius);
    triangulation.refine_global (parameters->meshsize);
@@ -1021,7 +1017,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<true>  /*dim_eq_spacedim*/)
    {    
    // define centre
    bool         initialize = 1;
-   const        Point<spacedim> centre (initialize); //initialize all to 0
+   const        Point<spacedim> centre; //initialize all to 0
    const double outer_radius = 1.,inner_radius=.5; 
    // tell program we have a curved boundary (needed for proper mesh refinement)
    static const HyperShellBoundary<spacedim> shell_boundary_description(centre);    
@@ -1062,10 +1058,10 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
   if ((common_parameters->domain_shape) == "square")
      { 
       Triangulation<spacedim> volume_mesh;
-         GridGenerator::hyper_cube (volume_mesh, 0., 1.);  // create [0,1]^spacedim
+          GridGenerator::hyper_cube (volume_mesh, 0., 1.);  // create [0,1]^spacedim 
           std::set<types::boundary_id> boundary_ids;
           boundary_ids.insert (0);
-         GridGenerator::extract_boundary_mesh (volume_mesh, triangulation,
+      GridGenerator::extract_boundary_mesh (volume_mesh, triangulation,
                                                boundary_ids);
      triangulation.refine_global (parameters->meshsize);
      }
@@ -1074,7 +1070,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
    { 
    // define centre
    bool         initialize = 1;
-   const        Point<spacedim> centre (initialize); //initialize all to 0
+   const        Point<spacedim> centre; //initialize all to 0
    const double radius = 1.; 
    // tell program we have a curved boundary (needed for proper mesh refinement)
    static const HyperBallBoundary<dim,spacedim> circular_boundary_description(centre,radius);    
@@ -1095,7 +1091,7 @@ void RDProblem<dim,spacedim>::make_grid(ValueToType<false>  /*dim_eq_spacedim*/)
    { 
    // define centre
    bool         initialize = 1;
-   const        Point<spacedim> centre (initialize); //initialize all to 0
+   const        Point<spacedim> centre ; //initialize all to 0
    const double outer_radius = 1.,inner_radius=.5; 
    // tell program we have a curved boundary (needed for proper mesh refinement)
    static const HyperBallBoundary<dim,spacedim> shell_boundary_description_inner(centre,inner_radius);  
@@ -2438,8 +2434,8 @@ void CoupledSystemHandler<dim,spacedim>::get_cell_map()
 
 
   // get a list of cells in the bulk that are on the bounadary
-  std::vector<active_cell_iterator_bulk>* boundary_cells_bulk =      new() std::vector<active_cell_iterator_bulk>;
-  std::vector<active_cell_iterator_bulk>* boundary_cells_bulk_copy = new() std::vector<active_cell_iterator_bulk>;
+  std::vector<active_cell_iterator_bulk>* boundary_cells_bulk =      new std::vector<active_cell_iterator_bulk>;
+  std::vector<active_cell_iterator_bulk>* boundary_cells_bulk_copy = new std::vector<active_cell_iterator_bulk>;
 
   // loop over bulk cells to find boundar cells
   for( ;cell_bulk!=RD_bulk.dof_handler.end() ; ++cell_bulk)
@@ -2640,17 +2636,7 @@ shared_out << "Builing initial sparsity pattern..." << std::endl;
                             compressed_sparsity_pattern_20,
                             compressed_sparsity_pattern_30,
                             compressed_sparsity_pattern_21, 
-                            compressed_sparsity_pattern_31; 
-
-  //CompressedSparsityPattern compressed_simple_sparsity_pattern_02,
-//				  compressed_simple_sparsity_pattern_03,
-//                                compressed_simple_sparsity_pattern_12,
-//				  compressed_simple_sparsity_pattern_13,
-//                                  compressed_simple_sparsity_pattern_20, 
-//				  compressed_simple_sparsity_pattern_30,
-//                                  compressed_simple_sparsity_pattern_21,
-//				  compressed_simple_sparsity_pattern_31;
-                                  
+                            compressed_sparsity_pattern_31;  
 
    compressed_sparsity_pattern_02.reinit(n_u,n_r);
    compressed_sparsity_pattern_03.reinit(n_u,n_s);
