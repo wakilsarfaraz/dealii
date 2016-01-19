@@ -1,0 +1,8 @@
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/lab-7.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/release.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/run.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/info.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/strip_comments.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/debug.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/distclean.dir
+/u/nsc/sarfarazwa/lab-7/CMakeFiles/runclean.dir

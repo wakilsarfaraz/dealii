@@ -1,0 +1,1 @@
+/usr/bin/c++      -rdynamic -pthread -ggdb CMakeFiles/lab-5.dir/lab-5.cc.o  -o lab-5 -rdynamic /apps/deal.II/deal.II-dev/lib/libdeal_II.g.so.8.4.0-pre -lbz2 -llapack /usr/lib/libf77blas.so.3gf /usr/lib/libatlas.so.3gf -lgfortran -lquadmath -lm -lc -ldl /usr/NX/lib/libz.so -lrt -lnetcdf_c++ -lnetcdf -Wl,-rpath,/apps/deal.II/deal.II-dev/lib:/usr/NX/lib 
