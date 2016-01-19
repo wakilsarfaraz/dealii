@@ -7,10 +7,10 @@ set Read Mesh = false
 # Time parameters - timestep method is BE or FST or CN
 # (use theta = -1. to use dafault value 1-sqrt(1/2)
 subsection Time
-   set Timestep  = .1
-   set Endtime   = .02
+   set Timestep  = .01
+   set Endtime   = .1
    set Timestep Method = FST
-   set Theta =    0.
+   set Theta =    -1.
 end
 
 # domain shape is one of square/circle/ellipse/moebius

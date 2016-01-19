@@ -1,5 +1,5 @@
 subsection Mesh and Domain
-   set Mesh size     = 4
+   set Mesh size     = 2
 end
 
 subsection Reaction

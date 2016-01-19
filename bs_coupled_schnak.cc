@@ -21,8 +21,19 @@
 #include <deal.II/base/logstream.h>
 #include <deal.II/base/thread_management.h>
 #include <deal.II/base/multithread_info.h>
+
+#include <deal.II/base/config.h>
+
+#include <deal.II/base/subscriptor.h>
+#include <deal.II/lac/exceptions.h>
+#include <deal.II/lac/petsc_vector_base.h>
+#include <deal.II/lac/petsc_parallel_vector.h>
+
+
+
+
 #include <deal.II/numerics/vector_tools.h>
-#include <deal.II/numerics/vector_tools.templates.h>
+/*#include <deal.II/numerics/vector_tools.templates.h>*/
 #include <deal.II/numerics/matrix_tools.h>
 #include <deal.II/numerics/fe_field_function.h>
 #include <deal.II/numerics/data_out.h>
@@ -2191,7 +2202,7 @@ void RDProblem<dim,spacedim>::process_solution()
 	 if ( (time_count % 100 == 0)  )
 	 {
 	   std::stringstream out;
-           out << output_directory << "/" << common_parameters->testID << "-solution_" << time_count << ".vtu";
+           out << output_directory << "/" << common_parameters->testID << "-solution_" << time_count << ".vtk";
            output_solution(solution,out.str());  
 	  }
      }
@@ -2200,7 +2211,7 @@ void RDProblem<dim,spacedim>::process_solution()
        if ( (time_count % 100 == 0)  )
          {
            std::stringstream out;
-           out << output_directory << "/" << common_parameters->testID << "-solution.vtu";
+           out << output_directory << "/" << common_parameters->testID << "-solution.vtk";
            output_solution(solution,out.str());  
          }
 }
@@ -2629,7 +2640,7 @@ shared_out << "Builing initial sparsity pattern..." << std::endl;
   block_sparsity_pattern.block(3,1).reinit(n_s,n_v,n_v);
   block_sparsity_pattern.collect_sizes();
 
-  /*CompressedSimpleSparsityPattern*/DynamicSparsityPattern compressed_sparsity_pattern_02,
+ DynamicSparsityPattern compressed_sparsity_pattern_02,
                             compressed_sparsity_pattern_03,
                             compressed_sparsity_pattern_12, 
                             compressed_sparsity_pattern_13,  
@@ -3689,8 +3700,8 @@ void CoupledSystemHandler<dim,spacedim>::run()
          break;
      } //end switch
 
-     RD_surf.output_solution(RD_surf.solution,surf_output_directory + "/xi_final.vtu");
-     RD_bulk.output_solution(RD_bulk.solution,bulk_output_directory + "/xi_final.vtu");
+     RD_surf.output_solution(RD_surf.solution,surf_output_directory + "/xi_final.vtk");
+     RD_bulk.output_solution(RD_bulk.solution,bulk_output_directory + "/xi_final.vtk");
 
 
 }
